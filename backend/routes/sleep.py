@@ -27,11 +27,11 @@ def sleep_post(db: Session = Depends(get_db)):
     if baby.is_awake:
         # create a new sleep session
         sleep_session = models.SleepSession(
-            baby_id=BABY_CONSTANT
+            baby_id=baby.id
         )
         # log the sleep in the sleep model
         sleep = models.Sleep(
-            baby_id=BABY_CONSTANT,
+            baby_id=baby.id,
             is_awake=False,
             sleep_id=1
         )
