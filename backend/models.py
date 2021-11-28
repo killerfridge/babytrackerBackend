@@ -7,16 +7,35 @@ from datetime import datetime, timezone
 from .utils import pwd_context
 
 
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    baby = relationship("Baby", back_populates="user")
+
+    def set_password(self, password):
+        self.password = pwd_context.hash(password)
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password)
+
+
 class Baby(Base):
     __tablename__ = 'babies'
 
     id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=True)
     sleeps = relationship("Sleep", back_populates='baby')
     feeds = relationship("Feed", back_populates='baby')
     is_awake = Column(Boolean, nullable=False, server_default="True")
     is_feeding = Column(Boolean, nullable=False, server_default="False")
     sleep_sessions = relationship("SleepSession", back_populates="baby")
     feed_sessions = relationship("FeedSession", back_populates="baby")
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user = relationship("User", back_populates="baby")
 
 
 class Sleep(Base):
@@ -31,7 +50,7 @@ class Sleep(Base):
 
 
 class SleepSession(Base):
-    __tablename__ = 'sleepsession'
+    __tablename__ = 'sleepsessions'
 
     id = Column(Integer, primary_key=True, nullable=False)
     sleep_start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))

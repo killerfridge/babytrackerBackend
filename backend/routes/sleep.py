@@ -1,7 +1,7 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from ..database import get_db
-from .. import models
+from .. import models, schemas, oauth2
 
 # This needs to be changed to allow multiple babies
 # Currently assuming only one child
@@ -19,11 +19,13 @@ def sleep_get():
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
-def sleep_post(db: Session = Depends(get_db)):
+def sleep_post(db: Session = Depends(get_db), user: models.User = Depends(oauth2.get_current_user)):
     # get the baby
-    baby_query = db.query(models.Baby).filter(models.Baby.id == BABY_CONSTANT)
+    baby_query = db.query(models.Baby).filter(models.Baby.user_id == user.id)
     baby = baby_query.first()
     # if the baby is awake
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby for {user.email} not found")
     if baby.is_awake:
         # create a new sleep session
         sleep_session = models.SleepSession(

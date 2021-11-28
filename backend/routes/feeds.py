@@ -1,7 +1,8 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from .. import models, database
+from .. import models, database, schemas
 from .sleep import BABY_CONSTANT
+from ..oauth2 import get_current_user
 
 
 router = APIRouter(
@@ -15,11 +16,13 @@ def feeds_get():
 
 
 @router.post("/")
-def feeds_post(db: Session = Depends(database.get_db)):
+def feeds_post(db: Session = Depends(database.get_db), user: models.User = Depends(get_current_user)):
     # filter to get the correct baby
-    # TODO: replace BABY_CONSTANT with a changeable id
-    # TODO: add filtering based on user
-    baby = db.query(models.Baby).filter(models.Baby.id == BABY_CONSTANT).first()
+    # TODO: replace BABY_CONSTANT with a changeable id - currently just takes first baby user logs
+    baby = db.query(models.Baby).filter(models.Baby.user_id == user.id).first()
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby for user {user.email} not found.")
     # Check if the baby is feeding
     if not baby.is_feeding:
         # create a new feeding session
