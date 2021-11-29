@@ -33,6 +33,21 @@ def post_babies(baby: schemas.BabyCreate, db: Session = Depends(get_db), user: s
     db.add(baby_model)
     db.commit()
     db.refresh(baby_model)
+
+    first_sleep_session = models.SleepSession(
+        baby_id = baby_model.id,
+    )
+    first_feed_session = models.FeedSession(
+        baby_id = baby_model.id
+    )
+    db.add(first_sleep_session)
+    db.add(first_feed_session)
+    db.commit()
+    db.refresh(first_sleep_session)
+    db.refresh(first_feed_session)
+    first_sleep_session.set_sleep_length()
+    first_feed_session.set_feed_length()
+    db.commit()
     return baby_model
 
 
