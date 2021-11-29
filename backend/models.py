@@ -45,7 +45,7 @@ class Sleep(Base):
     sleep_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     is_awake = Column(Boolean, nullable=False)
-    baby_id = Column(Integer, ForeignKey('babies.id', ondelete="CASCADE"), nullable=False)
+    baby_id = Column(Integer, ForeignKey('babies.id', ondelete="CASCADE"))
     baby = relationship("Baby", back_populates="sleeps")
 
 
@@ -74,7 +74,7 @@ class Feed(Base):
     feed_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
     is_start = Column(Boolean, nullable=False)
-    baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"), nullable=False)
+    baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"))
     baby = relationship("Baby", back_populates='feeds')
 
 

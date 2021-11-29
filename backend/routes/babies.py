@@ -48,3 +48,8 @@ def delete_baby(baby_id, db: Session = Depends(get_db), user: schemas.User = Dep
     db.commit()
 
     return {"message": f"Baby {baby_id} successfully deleted"}
+
+
+@router.get('/{baby_id}')
+def get_baby(baby_id: int, db: Session = Depends(get_db), user: schemas.User = Depends(get_current_user)):
+    baby = db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id)).first()

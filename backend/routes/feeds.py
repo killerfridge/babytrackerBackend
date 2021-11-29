@@ -1,7 +1,7 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from .. import models, database, schemas
-from .sleep import BABY_CONSTANT
 from ..oauth2 import get_current_user
 
 
@@ -15,11 +15,28 @@ def feeds_get():
     return {"message": "Feeds Get"}
 
 
-@router.post("/")
-def feeds_post(db: Session = Depends(database.get_db), user: models.User = Depends(get_current_user)):
+@router.get('/{baby}', response_model=schemas.Feed)
+def get_latest_feed(baby: int, db: Session = Depends(database.get_db), user: models.User = Depends(get_current_user)):
+    baby = db.query(models.Baby).filter(and_(models.Baby.id == baby, models.Baby.user_id == user.id)).first()
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby for user {user.email} not found.")
+
+    feed_session = db.query(models.FeedSession) \
+        .filter(models.FeedSession.baby_id == baby.id) \
+        .order_by(models.FeedSession.feed_start.desc()) \
+        .first()
+
+    if feed_session:
+        return feed_session
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No feeds logged for this baby")
+
+
+@router.post("/{baby}", response_model=schemas.Feed)
+def feeds_post(baby: int, db: Session = Depends(database.get_db), user: models.User = Depends(get_current_user)):
     # filter to get the correct baby
-    # TODO: replace BABY_CONSTANT with a changeable id - currently just takes first baby user logs
-    baby = db.query(models.Baby).filter(models.Baby.user_id == user.id).first()
+    baby = db.query(models.Baby).filter(and_(models.Baby.id == baby, models.Baby.user_id == user.id)).first()
 
     if not baby:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby for user {user.email} not found.")
@@ -42,8 +59,7 @@ def feeds_post(db: Session = Depends(database.get_db), user: models.User = Depen
         # add instance to the database
         db.add(feed)
         db.commit()
-        # TODO: either return nothing or something meaningful
-        return {'message': 'baby is feeding'}
+        return feed_session
     else:
         # get the last feeding session
         feed_session = db.query(models.FeedSession)\
@@ -64,5 +80,5 @@ def feeds_post(db: Session = Depends(database.get_db), user: models.User = Depen
         db.add(feed)
 
         db.commit()
-        # TODO: return a meaningful response
-        return {"message": "baby is now not feeding"}
+        db.refresh(feed_session)
+        return feed_session

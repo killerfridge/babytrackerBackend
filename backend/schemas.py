@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Token(BaseModel):
@@ -42,3 +42,25 @@ class Baby(BabyBase):
     id: int
     name: Optional[str]
     user_id: int
+    is_awake: bool
+    is_feeding: bool
+
+
+class Feed(BaseModel):
+    id: int
+    feed_start: datetime
+    feed_end: Optional[datetime]
+    feed_length: Optional[timedelta]
+
+    class Config:
+        orm_mode = True
+
+
+class Sleep(BaseModel):
+    id: int
+    sleep_start: datetime
+    sleep_end: Optional[datetime]
+    sleep_length: Optional[timedelta]
+
+    class Config:
+        orm_mode = True
