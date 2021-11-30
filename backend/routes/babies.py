@@ -22,7 +22,7 @@ def get_babies(db: Session = Depends(get_db), user: schemas.User = Depends(get_c
     return babies
 
 
-@router.post('/', response_model=schemas.Baby)
+@router.post('/', response_model=schemas.Baby, status_code=status.HTTP_201_CREATED)
 def post_babies(baby: schemas.BabyCreate, db: Session = Depends(get_db), user: schemas.User = Depends(get_current_user)):
 
     new_baby = baby.dict()
