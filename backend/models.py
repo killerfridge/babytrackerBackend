@@ -36,6 +36,8 @@ class Baby(Base):
     feed_sessions = relationship("FeedSession", back_populates="baby")
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user = relationship("User", back_populates="baby")
+    weights = relationship("Weight", back_populates="baby")
+    temperatures = relationship("Temperature", back_populates="baby")
 
 
 class Sleep(Base):
@@ -94,3 +96,23 @@ class FeedSession(Base):
     def set_feed_length(self):
         self.set_feed_end()
         self.feed_length = self.feed_end - self.feed_start
+
+
+class Weight(Base):
+    __tablename__ = 'weights'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    value = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
+    baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"))
+    baby = relationship("Baby", back_populates="weights")
+
+
+class Temperature(Base):
+    __tablename__ = 'temperatures'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    value = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
+    baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"))
+    baby = relationship("Baby", back_populates="temperatures")

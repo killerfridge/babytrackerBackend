@@ -64,3 +64,13 @@ class Sleep(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class WeightBase(BaseModel):
+    value: float
+    baby_id: float
+
+
+class TempBase(BaseModel):
+    value: float
+    baby_id: float
