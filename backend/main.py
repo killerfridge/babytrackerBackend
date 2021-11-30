@@ -10,7 +10,7 @@ app.include_router(users.router)
 app.include_router(babies.router)
 app.include_router(auth.router)
 
-origins = ["*"]
+origins = ["https://guildford-babytracker.herokuapp.com/"]
 
 app.add_middleware(
     CORSMiddleware,
