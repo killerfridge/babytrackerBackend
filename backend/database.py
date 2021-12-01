@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from .config import settings
 
-if settings.database_uri:
+if settings.database_url:
     SQLALCHEMY_DATABASE_URL = f'{settings.database_url}'
 else:
     SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.database_username}:{settings.database_password}@' \
