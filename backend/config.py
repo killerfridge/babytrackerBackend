@@ -1,15 +1,17 @@
 from pydantic import BaseSettings
+from typing import Optional
 
 
 class Settings(BaseSettings):
-    database_hostname: str
-    database_port: str
-    database_password: str
-    database_username: str
-    database_name: str
+    database_hostname: Optional[str]
+    database_port: Optional[str]
+    database_password: Optional[str]
+    database_username: Optional[str]
+    database_name: Optional[str]
     secret_key: str
     access_token_expire_minutes: int
     algorithm: str
+    database_url: Optional[str]
 
     class Config:
         env_file = 'backend/.env'

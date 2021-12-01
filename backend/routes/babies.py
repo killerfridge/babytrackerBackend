@@ -14,7 +14,9 @@ router = APIRouter(
 @router.get('/', response_model=List[schemas.Baby])
 def get_babies(db: Session = Depends(get_db), user: schemas.User = Depends(get_current_user)):
 
-    babies = db.query(models.Baby).filter(models.Baby.user_id == user.id).all()
+    babies = db.query(models.Baby)\
+        .filter(models.Baby.user_id == user.id)\
+        .all()
 
     if not babies:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No babies found for user {user.id}")

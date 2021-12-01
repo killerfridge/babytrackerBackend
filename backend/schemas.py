@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timedelta
 
 
@@ -74,3 +74,11 @@ class WeightBase(BaseModel):
 class TempBase(BaseModel):
     value: float
     baby_id: float
+
+
+class BabyAll(BaseModel):
+    Baby: Baby
+    SleepSession: Optional[Sleep]
+    FeedSession: Optional[Feed]
+
+
