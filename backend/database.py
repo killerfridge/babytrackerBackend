@@ -5,8 +5,8 @@ from .config import settings
 
 if settings.database_url:
     print("I've gotten this far!")
-    URL_STRING = settings.replace("postgres", "postgresql")
-    SQLALCHEMY_DATABASE_URL = f'{settings.database_url}'
+    URL_STRING = settings.database_url.replace("postgres", "postgresql")
+    SQLALCHEMY_DATABASE_URL = f'{URL_STRING}'
 else:
     SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.database_username}:{settings.database_password}@' \
                           f'{settings.database_hostname}:{settings.database_port}/{settings.database_name}'
