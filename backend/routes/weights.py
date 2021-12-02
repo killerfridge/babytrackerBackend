@@ -1,0 +1,52 @@
+from .. import database, schemas, models, oauth2
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, func
+from fastapi import APIRouter, Depends, HTTPException, status
+
+
+router = APIRouter(prefix='/weights',
+                   tags=['Weight Management'])
+
+
+@router.get('/{baby_id}')
+def get_weight(baby_id: int, user: schemas.User = Depends(oauth2.get_current_user), db: Session = Depends(database.get_db)):
+
+    baby = db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id))
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND(f"Baby {baby_id} not found for {user.email}"))
+
+    # avg_weight = db.query(func.avg(models.Weight.value).label('avg_weight'))\
+    #     .filter(models.Weight.baby_id == baby_id)\
+    #     .group_by(models.Weight.baby_id).label('avg')
+
+    weights = db.query(models.Weight)\
+        .filter(models.Weight.baby_id == baby_id)\
+        .order_by(models.Weight.created_at.desc())\
+        .first()
+
+    return weights
+
+
+@router.post('/{baby_id}')
+def post_weight(baby_id: int, weight: schemas.WeightValue, user: schemas.User = Depends(oauth2.get_current_user), db: Session = Depends(database.get_db)):
+
+    print(weight.value)
+
+    baby = db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id))
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND(f"Baby {baby_id} not found for {user.email}"))
+
+    new_weight = models.Weight(
+        value=weight.value,
+        baby_id=baby_id
+    )
+
+    db.add(new_weight)
+    db.commit()
+    db.refresh(new_weight)
+
+    return new_weight
+
+

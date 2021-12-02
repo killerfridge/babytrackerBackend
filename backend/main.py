@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import feeds, sleep, auth, users, babies
+from .routes import feeds, sleep, auth, users, babies, weights, temps
 
 app = FastAPI(title="Baby Tracker API")
 
@@ -9,6 +9,8 @@ app.include_router(sleep.router)
 app.include_router(users.router)
 app.include_router(babies.router)
 app.include_router(auth.router)
+app.include_router(weights.router)
+app.include_router(temps.router)
 
 origins = ["*"]
 

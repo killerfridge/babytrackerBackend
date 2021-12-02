@@ -71,9 +71,17 @@ class WeightBase(BaseModel):
     baby_id: float
 
 
+class WeightValue(BaseModel):
+    value: float
+
+
 class TempBase(BaseModel):
     value: float
     baby_id: float
+
+
+class TempValue(BaseModel):
+    value: float
 
 
 class BabyAll(BaseModel):
