@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get('/{baby_id}')
+@router.get('/{baby_id}', response_model=schemas.TempResponse)
 def get_temps(baby_id: int, db: Session = Depends(get_db), user: schemas.User = Depends(get_current_user)):
 
     baby = get_baby(baby_id, db=db, user=user)

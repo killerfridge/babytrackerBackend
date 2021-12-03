@@ -79,9 +79,20 @@ class TempBase(BaseModel):
     value: float
     baby_id: float
 
+    class Config:
+        orm_mode = True
+
 
 class TempValue(BaseModel):
     value: float
+
+
+class TempResponse(BaseModel):
+    Temperature: TempBase
+    avg: float
+
+    class Config:
+        orm_mode = True
 
 
 class BabyAll(BaseModel):
