@@ -75,6 +75,14 @@ class WeightValue(BaseModel):
     value: float
 
 
+class WeightPlot(WeightBase):
+    created_at: datetime
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 class TempBase(BaseModel):
     value: float
     baby_id: float
@@ -93,6 +101,10 @@ class TempResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TempPlot(TempBase):
+    created_at: datetime
 
 
 class BabyAll(BaseModel):

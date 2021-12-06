@@ -2,7 +2,8 @@ from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from ..database import get_db
-from .. import models, schemas, oauth2
+from .. import models, schemas, oauth2, utils
+from typing import List
 
 
 router = APIRouter(
@@ -16,7 +17,7 @@ def sleep_get():
 
 
 @router.get('/{baby_id}', response_model=schemas.Sleep)
-def get_latest_feed(baby_id: int, db: Session = Depends(get_db), user: models.User = Depends(oauth2.get_current_user)):
+def get_latest_feed(baby_id: int, db: Session = Depends(get_db), user: schemas.User = Depends(oauth2.get_current_user)):
 
     baby = db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id)).first()
 
@@ -34,8 +35,27 @@ def get_latest_feed(baby_id: int, db: Session = Depends(get_db), user: models.Us
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No sleeps logged for this baby")
 
 
+@router.get('/{baby_id}/plot', response_model=List[schemas.Sleep])
+def get_plot(baby_id: int, db: Session = Depends(get_db), user: schemas.User = Depends(oauth2.get_current_user)):
+
+    baby = utils.get_baby(baby_id, user, db)
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby {baby_id} not found for {user.email}.")
+
+    sleeps = db.query(models.SleepSession)\
+        .filter(models.SleepSession.baby_id == baby_id)\
+        .order_by(models.SleepSession.sleep_start.desc())\
+        .all()
+
+    if not sleeps:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Sleep Sessions")
+
+    return sleeps
+
+
 @router.post("/{baby_id}", status_code=status.HTTP_200_OK, response_model=schemas.Sleep)
-def sleep_post(baby_id: int, db: Session = Depends(get_db), user: models.User = Depends(oauth2.get_current_user)):
+def sleep_post(baby_id: int, db: Session = Depends(get_db), user: schemas.User = Depends(oauth2.get_current_user)):
     # get the baby
     baby_query = db.query(models.Baby).filter(
         and_(models.Baby.user_id == user.id, models.Baby.id == baby_id)

@@ -11,4 +11,4 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 def get_baby(baby_id: int, user: schemas.User, db: Session):
 
-    return db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id))
+    return db.query(models.Baby).filter(and_(models.Baby.id == baby_id, models.Baby.user_id == user.id)).first()
