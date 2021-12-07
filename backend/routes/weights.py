@@ -3,10 +3,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-import plotly.express as px
-import plotly as plt
-import numpy as np
-import pandas as pd
 
 
 router = APIRouter(prefix='/weights',

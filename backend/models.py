@@ -58,6 +58,7 @@ class SleepSession(Base):
     sleep_start = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     sleep_end = Column(TIMESTAMP(timezone=True), nullable=True)
     sleep_length = Column(Interval, nullable=True)
+    is_sleep = Column(Boolean, nullable=False, server_default="true")
     baby_id = Column(Integer, ForeignKey('babies.id', ondelete="CASCADE"))
     baby = relationship("Baby", back_populates="sleep_sessions")
 
