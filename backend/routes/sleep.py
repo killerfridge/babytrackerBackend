@@ -4,6 +4,7 @@ from sqlalchemy import and_
 from ..database import get_db
 from .. import models, schemas, oauth2, utils
 from typing import List
+import datetime
 
 
 router = APIRouter(
@@ -44,8 +45,8 @@ def get_plot(baby_id: int, db: Session = Depends(get_db), user: schemas.User = D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby {baby_id} not found for {user.email}.")
 
     sleeps = db.query(models.SleepSession)\
-        .filter(models.SleepSession.baby_id == baby_id)\
-        .order_by(models.SleepSession.sleep_start.desc())\
+        .filter(and_(models.SleepSession.baby_id == baby_id, models.SleepSession.sleep_length > datetime.timedelta(0)))\
+        .order_by(models.SleepSession.sleep_start.asc())\
         .all()
 
     if not sleeps:
