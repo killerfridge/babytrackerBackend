@@ -1,8 +1,10 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from .. import models, database, schemas
+from .. import models, database, schemas, utils
+from datetime import timedelta
 from ..oauth2 import get_current_user
+from typing import List
 
 
 router = APIRouter(
@@ -31,6 +33,24 @@ def get_latest_feed(baby: int, db: Session = Depends(database.get_db), user: mod
         return feed_session
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No feeds logged for this baby")
+
+
+@router.get('/{baby_id}/plot', response_model=List[schemas.Feed])
+def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schemas.User = Depends(get_current_user)):
+    baby = utils.get_baby(baby_id, user, db)
+
+    if not baby:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Baby for user {user.email} not found.')
+
+    feeds = db.query(models.FeedSession) \
+        .filter(models.FeedSession.baby_id == baby_id) \
+        .order_by(models.FeedSession.feed_start.asc()) \
+        .all()
+
+    if not feeds:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Sleep Sessions")
+
+    return feeds
 
 
 @router.post("/{baby}", response_model=schemas.Feed)

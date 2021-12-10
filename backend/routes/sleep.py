@@ -43,9 +43,9 @@ def get_plot(baby_id: int, db: Session = Depends(get_db), user: schemas.User = D
 
     if not baby:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Baby {baby_id} not found for {user.email}.")
-
+    # .filter(and_(models.SleepSession.baby_id == baby_id, models.SleepSession.sleep_length > datetime.timedelta(0)))\
     sleeps = db.query(models.SleepSession)\
-        .filter(and_(models.SleepSession.baby_id == baby_id, models.SleepSession.sleep_length > datetime.timedelta(0)))\
+        .filter(models.SleepSession.baby_id == baby_id)\
         .order_by(models.SleepSession.sleep_start.asc())\
         .all()
 
