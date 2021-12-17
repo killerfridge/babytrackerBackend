@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime, timedelta
+from enum import Enum
 
 
 class Token(BaseModel):
@@ -112,4 +113,10 @@ class BabyAll(BaseModel):
     SleepSession: Optional[Sleep]
     FeedSession: Optional[Feed]
 
+
+class NappyBase(BaseModel):
+    nappy_type: str
+
+    class Config:
+        orm_mode = True
 

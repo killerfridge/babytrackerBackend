@@ -1,10 +1,17 @@
 from .database import Base
-from sqlalchemy import Column, Integer, Text, String, Boolean, ForeignKey, Float, Interval
+from sqlalchemy import Column, Integer, Text, String, Boolean, ForeignKey, Float, Interval, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from datetime import datetime, timezone
 from .utils import pwd_context
+import enum
+
+
+class Nappy(enum.Enum):
+    wee = 1
+    poo = 2
+    wee_poo = 3
 
 
 class User(Base):
@@ -38,6 +45,7 @@ class Baby(Base):
     user = relationship("User", back_populates="baby")
     weights = relationship("Weight", back_populates="baby")
     temperatures = relationship("Temperature", back_populates="baby")
+    nappy_changes = relationship("NappyChanges", back_populates='baby')
 
 
 class Sleep(Base):
@@ -116,3 +124,13 @@ class Temperature(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
     baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"))
     baby = relationship("Baby", back_populates="temperatures")
+
+
+class NappyChanges(Base):
+    __tablename__ = 'nappies'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    nappy_type = Column(Enum(Nappy))
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"))
+    baby_id = Column(Integer, ForeignKey("babies.id", ondelete="CASCADE"))
+    baby = relationship("Baby", back_populates="nappy_changes")
