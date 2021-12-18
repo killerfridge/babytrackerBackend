@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 from .config import settings
 
 if settings.database_url:
-    print("I've gotten this far!")
     URL_STRING = settings.database_url.replace("postgres", "postgresql")
     SQLALCHEMY_DATABASE_URL = f'{URL_STRING}'
 else:
