@@ -17,13 +17,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     users = db.query(models.User)
 
-    emails = users.where(models.User.email == user.email).first()
+    emails = users.where(models.User.email == user.email.lower()).first()
 
     if emails:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Email {user.email} already in use. Do you wish to reset password?")
 
     new_user = models.User(
-        email=user.email
+        email=user.email.lower()
     )
     new_user.set_password(user.password)
     db.add(new_user)
