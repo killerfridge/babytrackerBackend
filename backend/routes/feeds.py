@@ -49,8 +49,9 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
 
     response = []
     for feed in feeds:
+        if not feed.feed_end:
+            continue
         if feed.feed_start.day != feed.feed_end.day:
-            print(f"Hello there {feed.id}")
             new_end = datetime(
                 feed.feed_start.year,
                 feed.feed_start.month,
