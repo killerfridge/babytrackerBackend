@@ -2,7 +2,7 @@ from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from .. import models, database, schemas, utils
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from ..oauth2 import get_current_user
 from typing import List
 
@@ -47,10 +47,46 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
         .order_by(models.FeedSession.feed_start.asc()) \
         .all()
 
+    response = []
+    for feed in feeds:
+        if feed.feed_start.day != feed.feed_end.day:
+            print(f"Hello there {feed.id}")
+            new_end = datetime(
+                feed.feed_start.year,
+                feed.feed_start.month,
+                feed.feed_start.day,
+                0, 0, tzinfo=timezone.utc) + timedelta(days=1)
+            new_length = new_end - feed.feed_start
+            response.append(
+                schemas.Feed(
+                    id = feed.id,
+                    feed_start = feed.feed_start,
+                    feed_end = new_end,
+                    feed_length = new_length
+                )
+            )
+
+            response.append(
+                schemas.Feed(
+                    id = feed.id,
+                    feed_start = new_end,
+                    feed_end = feed.feed_end,
+                    feed_length = feed.feed_end - new_end
+                )
+            )
+        else:
+            response.append(schemas.Feed(
+                id = feed.id,
+                feed_start = feed.feed_start,
+                feed_end = feed.feed_end,
+                feed_length = feed.feed_length
+            ))
+    print(response)
+
     if not feeds:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Sleep Sessions")
 
-    return feeds
+    return response
 
 
 @router.post("/{baby}", response_model=schemas.Feed)
