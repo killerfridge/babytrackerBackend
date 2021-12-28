@@ -52,6 +52,9 @@ class Feed(BaseModel):
     feed_start: datetime
     feed_end: Optional[datetime]
     feed_length: Optional[timedelta]
+    feed_start_label: Optional[datetime]
+    feed_end_label: Optional[datetime]
+    feed_length_label: Optional[timedelta]
 
     class Config:
         orm_mode = True

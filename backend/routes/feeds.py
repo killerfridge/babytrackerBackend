@@ -57,11 +57,16 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
                 feed.feed_start.month,
                 feed.feed_start.day,
                 0, 0, tzinfo=timezone.utc) + timedelta(days=1)
+
             new_length = new_end - feed.feed_start
+
             response.append(
                 schemas.Feed(
                     id = feed.id,
                     feed_start = feed.feed_start,
+                    feed_start_label=feed.feed_start,
+                    feed_end_label=feed.feed_end,
+                    feed_length_label=feed.feed_length,
                     feed_end = new_end,
                     feed_length = new_length
                 )
@@ -72,7 +77,10 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
                     id = feed.id,
                     feed_start = new_end,
                     feed_end = feed.feed_end,
-                    feed_length = feed.feed_end - new_end
+                    feed_length = feed.feed_end - new_end,
+                    feed_start_label=feed.feed_start,
+                    feed_end_label=feed.feed_end,
+                    feed_length_label=feed.feed_length,
                 )
             )
         else:
@@ -80,7 +88,10 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
                 id = feed.id,
                 feed_start = feed.feed_start,
                 feed_end = feed.feed_end,
-                feed_length = feed.feed_length
+                feed_length = feed.feed_length,
+                feed_start_label=feed.feed_start,
+                feed_end_label=feed.feed_end,
+                feed_length_label=feed.feed_length,
             ))
     print(response)
 
