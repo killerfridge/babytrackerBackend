@@ -93,7 +93,6 @@ def get_plots(baby_id: int, db: Session = Depends(database.get_db), user: schema
                 feed_end_label=feed.feed_end,
                 feed_length_label=feed.feed_length,
             ))
-    print(response)
 
     if not feeds:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Sleep Sessions")

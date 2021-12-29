@@ -65,6 +65,9 @@ class Sleep(BaseModel):
     sleep_start: datetime
     sleep_end: Optional[datetime]
     sleep_length: Optional[timedelta]
+    sleep_start_label: Optional[datetime]
+    sleep_end_label: Optional[datetime]
+    sleep_length_label: Optional[timedelta]
 
     class Config:
         orm_mode = True

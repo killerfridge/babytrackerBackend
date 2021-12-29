@@ -4,7 +4,7 @@ from sqlalchemy import and_
 from ..database import get_db
 from .. import models, schemas, oauth2, utils
 from typing import List
-import datetime
+from datetime import datetime, timezone, timedelta
 
 
 router = APIRouter(
@@ -49,10 +49,57 @@ def get_plot(baby_id: int, db: Session = Depends(get_db), user: schemas.User = D
         .order_by(models.SleepSession.sleep_start.asc())\
         .all()
 
+    response = []
+    for sleep in sleeps:
+        if not sleep.sleep_end:
+            continue
+        if sleep.sleep_start.day != sleep.sleep_end.day:
+            new_end = datetime(
+                sleep.sleep_start.year,
+                sleep.sleep_start.month,
+                sleep.sleep_start.day,
+                0, 0, tzinfo=timezone.utc) + timedelta(days=1)
+
+            new_length = new_end - sleep.sleep_start
+
+            response.append(
+                schemas.Sleep(
+                    id=sleep.id,
+                    sleep_start=sleep.sleep_start,
+                    sleep_start_label=sleep.sleep_start,
+                    sleep_end_label=sleep.sleep_end,
+                    sleep_length_label=sleep.sleep_length,
+                    sleep_end=new_end,
+                    sleep_length=new_length
+                )
+            )
+
+            response.append(
+                schemas.Sleep(
+                    id=sleep.id,
+                    sleep_start=new_end,
+                    sleep_end=sleep.sleep_end,
+                    sleep_length=sleep.sleep_end - new_end,
+                    sleep_start_label=sleep.sleep_start,
+                    sleep_end_label=sleep.sleep_end,
+                    sleep_length_label=sleep.sleep_length,
+                )
+            )
+        else:
+            response.append(schemas.Sleep(
+                id=sleep.id,
+                sleep_start=sleep.sleep_start,
+                sleep_end=sleep.sleep_end,
+                sleep_length=sleep.sleep_length,
+                sleep_start_label=sleep.sleep_start,
+                sleep_end_label=sleep.sleep_end,
+                sleep_length_label=sleep.sleep_length,
+            ))
+
     if not sleeps:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Sleep Sessions")
 
-    return sleeps
+    return response
 
 
 @router.post("/{baby_id}", status_code=status.HTTP_200_OK, response_model=schemas.Sleep)
