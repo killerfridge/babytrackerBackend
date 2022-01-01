@@ -1,11 +1,12 @@
 from ..oauth2 import get_current_user
-from ..utils import get_baby
+from ..utils import get_baby, is_baby
 from ..database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 from ..models import NappyChanges, Nappy
-from ..schemas import User, NappyBase
+from ..schemas import User, NappyBase, NappyPlot
+from typing import List
 import datetime
 
 router = APIRouter(
@@ -81,6 +82,11 @@ def get_latest(baby_id: int, db: Session = Depends(get_db), user: User = Depends
 
 @router.post('/{baby_id}', status_code=status.HTTP_201_CREATED)
 def post(nappy: NappyBase, baby_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+
+    baby = get_baby(baby_id, user, db)
+
+    is_baby(baby)
+
     new_nappy = NappyChanges(
         baby_id=baby_id,
         nappy_type=nappy.nappy_type
@@ -90,3 +96,18 @@ def post(nappy: NappyBase, baby_id: int, db: Session = Depends(get_db), user: Us
     db.commit()
     db.refresh(new_nappy)
     return new_nappy
+
+
+@router.get('/{baby_id}/plot', response_model=List[NappyPlot])
+def get_plot(baby_id: int, db: Session = Depends(get_db), user:User = Depends(get_current_user)):
+    baby = get_baby(baby_id, user, db)
+
+    is_baby(baby)
+
+    nappies = db.query(NappyChanges).filter(NappyChanges.baby_id == baby_id).all()
+
+    if not nappies:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No nappy changes logged')
+
+    return nappies
+

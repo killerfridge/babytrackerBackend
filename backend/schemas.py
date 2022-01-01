@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -121,8 +121,13 @@ class BabyAll(BaseModel):
 
 
 class NappyBase(BaseModel):
-    nappy_type: str
+    nappy_type: Any
 
     class Config:
         orm_mode = True
+
+
+class NappyPlot(NappyBase):
+    created_at: datetime
+    id: int
 
